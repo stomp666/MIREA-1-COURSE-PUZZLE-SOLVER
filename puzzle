@@ -31,6 +31,17 @@
 #include <Windows.h>
 #include <stdlib.h>
 #include <time.h>
+#include <conio.h>
+
+#define r_key 114
+#define R_KEY 82
+#define g_key 103
+#define G_KEY 71
+#define s_key 115
+#define S_KEY 83
+#define p_key 112
+#define P_KEY 80
+#define exit_key 48
 
 using namespace std;
 
@@ -62,7 +73,7 @@ void generate()
     *      8 F 2    -2 T 13
     *        3         67
     *
-    */ 
+    */
 
 
     // Также: числа = целочисленные и <= k. чем меньше k тем хуже. а вводит его ПОЛЬЗОВАТЕЛЬ
@@ -71,14 +82,14 @@ void generate()
     IsGenerated = true;
     printf("Enter puzzle size.\n");
     cin >> puzzleSize;
-
+    system("CLS");
     if (puzzleSize < 2)
     {
         cout << "Can't generate.\n";
         exit(0);
     }
-    
-    printf("Please enter a number to make a puzzle sort difficulty.\n");
+
+    printf("Please enter a number to make a puzzle sort difficulty.\n\nHard        Easy\n1            INF\n<-------------->\n");
     cin >> MaxPossibleValue;
 
     image = new bool* [puzzleSize];
@@ -91,15 +102,14 @@ void generate()
     for (int i = 0; i < puzzleSize; i++)
     {
         image[i] = new bool[puzzleSize];
-        
+
         for (int j = 0; j < puzzleSize; j++)
         {
             image[i][j] = rand() % 2;
-
-            if (image_sliced[i][j].up >= 0 || image_sliced[i][j].up == -842150451){
+            if (image_sliced[i][j].up >= 0 || image_sliced[i][j].up == -842150451) {
                 image_sliced[i][j].up = (rand() % MaxPossibleValue) + 1;
             }
-            
+
             image_sliced[i][j].right = (rand() % MaxPossibleValue) + 1;
             if (image_sliced[i][j].left >= 0 || image_sliced[i][j].left == -842150451)
             {
@@ -108,8 +118,8 @@ void generate()
             image_sliced[i][j].down = (rand() % MaxPossibleValue) + 1;
             image_sliced[i][j].pixel = image[i][j];
 
-            if (i < puzzleSize-1) {
-                image_sliced[i+1][j].up = -image_sliced[i][j].down;
+            if (i < puzzleSize - 1) {
+                image_sliced[i + 1][j].up = -image_sliced[i][j].down;
             }
             if (j < puzzleSize - 1)
             {
@@ -120,6 +130,7 @@ void generate()
         //cout << endl;
     }
     //cout << endl;
+    system("CLS");
 }
 void randomize()
 {
@@ -137,7 +148,7 @@ void randomize()
     for (int i = 0; i < puzzleSize; i++)
     {
         for (int j = 0; j < puzzleSize; j++)
-        { 
+        {
             int randomNumber = rand() % 100 + puzzleSize;
             int x = ((myTime->tm_sec) + randomNumber) % puzzleSize;
             int y = ((myTime->tm_sec) + randomNumber + 16) % puzzleSize;
@@ -150,11 +161,12 @@ void randomize()
     {
         for (int j = 0; j < puzzleSize; j++)
         {
-           // cout << (image_sliced[i][j].pixel ? 1 : 0) << " ";
+            // cout << (image_sliced[i][j].pixel ? 1 : 0) << " ";
         }
         //cout << endl;
     }
-   // cout << endl;
+    // cout << endl;
+    system("CLS");
 }
 void solve()
 {
@@ -198,7 +210,7 @@ void solve()
                         {
                             continue;
                         }
-                        if (image_sliced[i][j].down != -(image_sliced[i+1][j].up) && image_sliced[i][j].down == -(image_sliced[z][a].up))
+                        if (image_sliced[i][j].down != -(image_sliced[i + 1][j].up) && image_sliced[i][j].down == -(image_sliced[z][a].up))
                         {
                             if (image_sliced[i][j].pixel == image[i][j])
                             {
@@ -211,7 +223,7 @@ void solve()
                         {
                             continue;
                         }
-                        if (image_sliced[i][j].right == -(image_sliced[z][a].left) && image_sliced[i][j].right != -(image_sliced[i][j+1].left))
+                        if (image_sliced[i][j].right == -(image_sliced[z][a].left) && image_sliced[i][j].right != -(image_sliced[i][j + 1].left))
                         {
                             if (image_sliced[i][j].pixel == image[i][j])
                             {
@@ -222,15 +234,15 @@ void solve()
                         }
                     }
                 }
-                
-                cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 12), (char)254u) << " ";
+
+                cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
             }
-            
+
             cout << endl;
         }
-        Sleep(500);
+        Sleep(50);
         system("CLS");
-        
+
         for (int i = 0; i < puzzleSize; i++)
         {
             for (int j = 0; j < puzzleSize; j++)
@@ -241,7 +253,7 @@ void solve()
                 }
             }
         }
-        if (check == pow(puzzleSize,2))
+        if (check == pow(puzzleSize, 2))
         {
             break;
         }
@@ -250,24 +262,27 @@ void solve()
             retry += 1;
             check = 0;
         }
-        if (retry > 20)
+       if (retry > pow(puzzleSize,2))
         {
             system("CLS");
             cout << "Unsolvable. Press enter to go to menu.\n";
             cin.get();
+            system("CLS");
             return;
         }
+      
     }
     for (int i = 0; i < puzzleSize; i++)
     {
         for (int j = 0; j < puzzleSize; j++)
         {
-            cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 12), (char)254u) << " ";
+            cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
         }
         cout << endl;
     }
     cout << "\n\nSolved. Press enter to go to menu.\n";
     cin.get();
+    system("CLS");
 }
 
 void printpuzzle()
@@ -283,7 +298,7 @@ void printpuzzle()
     {
         for (int j = 0; j < puzzleSize; j++)
         {
-            cout << (image[i][j] ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 12), (char)254u) << " ";
+            cout << (image[i][j] ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
         }
         cout << endl;
     }
@@ -292,7 +307,7 @@ void printpuzzle()
     {
         for (int j = 0; j < puzzleSize; j++)
         {
-            cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 12), (char)254u) << " ";
+            cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
         }
         cout << endl;
     }
@@ -303,35 +318,38 @@ void printpuzzle()
 }
 int main()
 {
-    string select;
-    
+    int c = 0;
     while (1)
     {
-        system("CLS");
+        
         SetConsoleTextAttribute(hConsole, 15);
         printf("Welcome to puzzle solver.\n\n");
-        printf("Enter 'g' to generate image.\nEnter 'r' to transfer image into puzzle.\nEnter 's' to solve.\nEnter 'p' to print image.\nEnter 0 to exit.\n\n");
-        getline(cin, select);
-        switch (select[0])
+        printf("Press 'g' to generate image.\nPress 'r' to transfer image into puzzle.\nPress 's' to solve.\nPress 'p' to print image.\nPress 0 to exit.\n\n");
+        
+        switch ((c = _getch()))
         {
-        case '0':
+        case exit_key:
             exit(0);
-        case 'g':
+        case g_key:
+        case G_KEY:
             generate();
             break;
-        case 'r':
+        case r_key:
+        case R_KEY:
             randomize();
             break;
-        case 's':
+        case s_key:
+        case S_KEY:
             solve();
             break;
-        case 'p':
+        case p_key:
+        case P_KEY:
             printpuzzle();
             break;
         default:
             system("CLS");
             break;
         }
-        
+
     }
 }
