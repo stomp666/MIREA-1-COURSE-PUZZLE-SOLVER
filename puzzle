@@ -169,6 +169,7 @@ void generate()
 }
 void FixBadCorners()
 {
+    int multiplier = 1;
     for (int i = 0; i < puzzleSize; i++)
     {
         for (int j = 0; j < puzzleSize; j++)
@@ -177,20 +178,24 @@ void FixBadCorners()
             {
                 if (image_sliced[i][j].up > 0)
                 {
-                    image_sliced[i][j].up += 100;
+                    image_sliced[i][j].up += 100*multiplier;
+                    multiplier += 1;
                 }
                 if (image_sliced[i][j].left > 0)
                 {
-                    image_sliced[i][j].left += 100;
+                    image_sliced[i][j].left += 100 * multiplier;
+                    multiplier += 1;
                 }
             }
             if (arrayTR[i] == arrayTR[j] && i != j)
             {
-                image_sliced[i][j].right += 100;
+                image_sliced[i][j].right += 100 * multiplier;
+                multiplier += 1;
             }
             if (arrayDL[i] == arrayDL[j] && i != j)
             {
-                image_sliced[i][j].down += 100;
+                image_sliced[i][j].down += 100 * multiplier;
+                multiplier += 1;
             }
             if (arrayDR[i] == arrayDR[j] && i != j)
             {
