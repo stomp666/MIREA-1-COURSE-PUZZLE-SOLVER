@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <conio.h>
+#include <vector>
 
 #define r_key 114
 #define R_KEY 82
@@ -42,6 +43,7 @@
 #define p_key 112
 #define P_KEY 80
 #define exit_key 48
+#define debug_key 49
 
 using namespace std;
 
@@ -58,6 +60,12 @@ int MaxPossibleValue = 5;
 int puzzleSize = 1;
 bool IsGenerated = false;
 
+string ArraySolversBuf;
+vector<string> arrayTL;
+vector<string> arrayTR;
+vector<string> arrayDL;
+vector<string> arrayDR;
+// мне плевать буду вектора использовать
 void generate()
 {
     system("CLS");
@@ -74,8 +82,6 @@ void generate()
     *        3         67
     *
     */
-
-
     // Также: числа = целочисленные и <= k. чем меньше k тем хуже. а вводит его ПОЛЬЗОВАТЕЛЬ
     // T/F = bool
 
@@ -92,13 +98,23 @@ void generate()
     printf("Please enter a number to make a puzzle sort difficulty.\n\nHard        Easy\n1            INF\n<-------------->\n");
     cin >> MaxPossibleValue;
 
+    if (cin.fail())
+    {
+        cout << "Bad Value\n";
+        return;
+    }
+
     image = new bool* [puzzleSize];
-    image_sliced = new piece * [puzzleSize];
+    image_sliced = new piece* [puzzleSize];
+
     for (int i = 0; i < puzzleSize; i++)
     {
         image_sliced[i] = new piece[puzzleSize];
     }
-
+    arrayTL.resize(puzzleSize);
+    arrayTR.resize(puzzleSize);
+    arrayDL.resize(puzzleSize);
+    arrayDR.resize(puzzleSize);
     for (int i = 0; i < puzzleSize; i++)
     {
         image[i] = new bool[puzzleSize];
@@ -117,7 +133,7 @@ void generate()
             }
             image_sliced[i][j].down = (rand() % MaxPossibleValue) + 1;
             image_sliced[i][j].pixel = image[i][j];
-
+            
             if (i < puzzleSize - 1) {
                 image_sliced[i + 1][j].up = -image_sliced[i][j].down;
             }
@@ -125,12 +141,63 @@ void generate()
             {
                 image_sliced[i][j + 1].left = -image_sliced[i][j].right;
             }
-            //cout << image_sliced[i][j].pixel << " ";
+            
+            ArraySolversBuf += to_string(image_sliced[i][j].up);
+            ArraySolversBuf += ",";
+            ArraySolversBuf += to_string(image_sliced[i][j].left);
+            arrayTL[i] = ArraySolversBuf;
+            ArraySolversBuf = "";
+            ArraySolversBuf += to_string(image_sliced[i][j].up);
+            ArraySolversBuf += ",";
+            ArraySolversBuf += to_string(image_sliced[i][j].right);
+            arrayTR[i] = ArraySolversBuf;
+            ArraySolversBuf = "";
+            ArraySolversBuf += to_string(image_sliced[i][j].left);
+            ArraySolversBuf += ",";
+            ArraySolversBuf += to_string(image_sliced[i][j].down);
+            arrayDL[i] = ArraySolversBuf;
+            ArraySolversBuf = "";
+            ArraySolversBuf += to_string(image_sliced[i][j].right);
+            ArraySolversBuf += ",";
+            ArraySolversBuf += to_string(image_sliced[i][j].down);
+            arrayDR[i] = ArraySolversBuf;
+            ArraySolversBuf = "";
         }
-        //cout << endl;
     }
-    //cout << endl;
     system("CLS");
+    FixBadCorners();
+}
+void FixBadCorners()
+{
+    for (int i = 0; i < puzzleSize; i++)
+    {
+        for (int j = 0; j < puzzleSize; j++)
+        {
+            if (arrayTL[i] == arrayTL[j] && i != j)
+            {
+                if (image_sliced[i][j].up > 0)
+                {
+                    image_sliced[i][j].up += 100;
+                }
+                if (image_sliced[i][j].left > 0)
+                {
+                    image_sliced[i][j].left += 100;
+                }
+            }
+            if (arrayTR[i] == arrayTR[j] && i != j)
+            {
+                image_sliced[i][j].right += 100;
+            }
+            if (arrayDL[i] == arrayDL[j] && i != j)
+            {
+                image_sliced[i][j].down += 100;
+            }
+            if (arrayDR[i] == arrayDR[j] && i != j)
+            {
+                image_sliced[i][j].down += 100;
+            }
+        }
+    }
 }
 void randomize()
 {
@@ -171,7 +238,6 @@ void randomize()
 void solve()
 {
     system("CLS");
-    int retry = 0;
     piece buffer;
     if (IsGenerated == false)
     {
@@ -192,86 +258,54 @@ void solve()
             }
         }
     }
-    while (true)
+    
+    for (int i = 0; i < puzzleSize; i++)
     {
-        for (int i = 0; i < puzzleSize; i++)
+        for (int j = 0; j < puzzleSize; j++)
         {
-            for (int j = 0; j < puzzleSize; j++)
+            for (int z = 0; z < puzzleSize; z++)
             {
-                for (int z = 0; z < puzzleSize; z++)
+                for (int a = 0; a < puzzleSize; a++)
                 {
-                    for (int a = 0; a < puzzleSize; a++)
+                    if (a == j && z == i)
                     {
-                        if (a == j && z == i)
+                        continue;
+                    }
+                    if (i + 1 == puzzleSize)
+                    {
+                        continue;
+                    }
+                    if (image_sliced[i][j].down != -(image_sliced[i + 1][j].up) && image_sliced[i][j].down == -(image_sliced[z][a].up))
+                    {
+                        if (image_sliced[i][j].pixel == image[i][j])
                         {
-                            continue;
+                            buffer = image_sliced[i + 1][j];
+                            image_sliced[i + 1][j] = image_sliced[z][a];
+                            image_sliced[z][a] = buffer;
                         }
-                        if (i + 1 == puzzleSize)
+                    }
+                    if (j + 1 == puzzleSize)
+                    {
+                        continue;
+                    }
+                    if (image_sliced[i][j].right == -(image_sliced[z][a].left) && image_sliced[i][j].right != -(image_sliced[i][j + 1].left))
+                    {
+                        if (image_sliced[i][j].pixel == image[i][j])
                         {
-                            continue;
-                        }
-                        if (image_sliced[i][j].down != -(image_sliced[i + 1][j].up) && image_sliced[i][j].down == -(image_sliced[z][a].up))
-                        {
-                            if (image_sliced[i][j].pixel == image[i][j])
-                            {
-                                buffer = image_sliced[i + 1][j];
-                                image_sliced[i + 1][j] = image_sliced[z][a];
-                                image_sliced[z][a] = buffer;
-                            }
-                        }
-                        if (j + 1 == puzzleSize)
-                        {
-                            continue;
-                        }
-                        if (image_sliced[i][j].right == -(image_sliced[z][a].left) && image_sliced[i][j].right != -(image_sliced[i][j + 1].left))
-                        {
-                            if (image_sliced[i][j].pixel == image[i][j])
-                            {
-                                buffer = image_sliced[i][j + 1];
-                                image_sliced[i][j + 1] = image_sliced[z][a];
-                                image_sliced[z][a] = buffer;
-                            }
+                            buffer = image_sliced[i][j + 1];
+                            image_sliced[i][j + 1] = image_sliced[z][a];
+                            image_sliced[z][a] = buffer;
                         }
                     }
                 }
-
-                cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
             }
 
-            cout << endl;
+            cout << (image_sliced[i][j].pixel ? SetConsoleTextAttribute(hConsole, 15), (char)254u : SetConsoleTextAttribute(hConsole, 8), (char)254u) << " ";
         }
-        Sleep(50);
-        system("CLS");
-
-        for (int i = 0; i < puzzleSize; i++)
-        {
-            for (int j = 0; j < puzzleSize; j++)
-            {
-                if (image_sliced[i][j].pixel == image[i][j])
-                {
-                    check += 1;
-                }
-            }
-        }
-        if (check == pow(puzzleSize, 2))
-        {
-            break;
-        }
-        else
-        {
-            retry += 1;
-            check = 0;
-        }
-       if (retry > pow(puzzleSize,2))
-        {
-            system("CLS");
-            cout << "Unsolvable. Press enter to go to menu.\n";
-            cin.get();
-            system("CLS");
-            return;
-        }
-      
+        cout << endl;
     }
+    Sleep(5);
+    system("CLS");
     for (int i = 0; i < puzzleSize; i++)
     {
         for (int j = 0; j < puzzleSize; j++)
@@ -316,16 +350,78 @@ void printpuzzle()
     cin.get();
     system("CLS");
 }
+
+void void_debug()
+{
+    system("CLS");
+    if (IsGenerated == false)
+    {
+        system("CLS");
+        cout << "Image is not generated.\n\n";
+        return;
+    }
+    /*cout << "     A" << endl;
+    cout << "   B 0 C" << endl;
+    cout << "     D" << endl;
+    for (int i = 0; i < puzzleSize; i++)
+    {
+        cout << endl <<"             A,B";
+        cout << "\nvector TL: " << arrayTL[i];
+        cout << endl << "             A,C";
+        cout << "\nvector TR: " << arrayTR[i];
+        cout << endl << "             C,D";
+        cout << "\nvector DR: " << arrayDR[i];
+        cout << endl << "             B,D";
+        cout << "\nvector DL: " << arrayDL[i];
+        cout << endl;
+    }*/
+    cout << endl << endl << endl;
+    for (int i = 0; i < puzzleSize; i++)
+    {
+        for (int j = 0; j < puzzleSize; j++)
+        {
+            if (arrayTL[i] == arrayTL[j] && i != j)
+            {
+                cout << "\nfound duplicate for TL\n";
+                if (image_sliced[i][j].up > 0)
+                {
+                    image_sliced[i][j].up += 100;
+                }
+                if (image_sliced[i][j].left > 0)
+                {
+                    image_sliced[i][j].left += 100;
+                }
+            }
+            if (arrayTR[i] == arrayTR[j] && i != j)
+            {
+                cout << "\nfound duplicate for TR\n";
+                image_sliced[i][j].right += 100;
+            }
+            if (arrayDL[i] == arrayDL[j] && i != j)
+            {
+                cout << "\nfound duplicate for DL\n";
+                image_sliced[i][j].down += 100;
+            }
+            if (arrayDR[i] == arrayDR[j] && i != j)
+            {
+                cout << "\nfound duplicate for DR\n";
+                image_sliced[i][j].down += 100;
+            }
+        }
+    }
+    
+}
+
 int main()
 {
     int c = 0;
     while (1)
     {
-        
+
         SetConsoleTextAttribute(hConsole, 15);
         printf("Welcome to puzzle solver.\n\n");
         printf("Press 'g' to generate image.\nPress 'r' to transfer image into puzzle.\nPress 's' to solve.\nPress 'p' to print image.\nPress 0 to exit.\n\n");
-        
+
         switch ((c = _getch()))
         {
         case exit_key:
@@ -345,6 +441,9 @@ int main()
         case p_key:
         case P_KEY:
             printpuzzle();
+            break;
+        case debug_key:
+            void_debug();
             break;
         default:
             system("CLS");
